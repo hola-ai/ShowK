@@ -13,18 +13,35 @@ text:SetText("K")
 text:SetAllPoints(frame)
 text:Show()  -- 초기 상태는 보이는 상태
 
+local isKShown = true
+local isChanneling = false
+
+local function ShowK()
+    text:Show()
+    frame.bg:SetColorTexture(0, 0, 0, 1)
+end
+
+local function HideK()
+    text:Hide()
+    frame.bg:SetColorTexture(0, 0, 0, 0)
+end
+
 local function ToggleKDisplay()
-    if text:IsShown() then
-        text:Hide()
-        frame.bg:SetColorTexture(0, 0, 0, 0)  -- 텍스트 숨길 때 배경 투명도 0
+    if isKShown then
+        isKShown = false
+        if not isChanneling then
+            HideK()
+        end
     else
-        text:Show()
-        frame.bg:SetColorTexture(0, 0, 0, 1)  -- 텍스트 보일 때 배경 불투명
+        isKShown = true
+        ShowK()
     end
 end
 
 frame:RegisterEvent("MODIFIER_STATE_CHANGED")
 frame:RegisterEvent("PLAYER_LOGIN")
+frame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
+frame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
 
 local isAltPressed = false
 
@@ -36,6 +53,14 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
     elseif event == "PLAYER_LOGIN" then
         -- 키 바인딩 설정
         SetBindingClick("ALT-K", frame:GetName(), "LeftButton")
+    elseif event == "UNIT_SPELLCAST_CHANNEL_START" and arg1 == "player" then
+        isChanneling = true
+        ShowK()
+    elseif event == "UNIT_SPELLCAST_CHANNEL_STOP" and arg1 == "player" then
+        isChanneling = false
+        if not isKShown then
+            HideK()
+        end
     end
 end)
 
