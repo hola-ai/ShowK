@@ -1,6 +1,6 @@
 local frame = CreateFrame("Frame", "ShowKFrame", UIParent)
 frame:SetSize(55, 40)  -- 표시할 영역의 크기 설정
-frame:SetPoint("CENTER", UIParent, "CENTER", -55, -223)  -- 화면 중앙에서 오른쪽으로 200, 위로 100 픽셀 위치에 배치
+frame:SetPoint("CENTER", UIParent, "CENTER", -1312, -185)  -- 화면 중앙에서 오른쪽으로 200, 위로 100 픽셀 위치에 배치
 
 -- 배경 텍스처 추가 및 설정
 frame.bg = frame:CreateTexture(nil, "BACKGROUND")
@@ -37,6 +37,10 @@ local function ToggleKDisplay()
         ShowK()
     end
 end
+
+-- 기본 경험치 바 숨기기
+--MainMenuBarExpBar:Hide()
+--MainMenuBarExpBar:UnregisterAllEvents()
 
 frame:RegisterEvent("MODIFIER_STATE_CHANGED")
 frame:RegisterEvent("PLAYER_LOGIN")
