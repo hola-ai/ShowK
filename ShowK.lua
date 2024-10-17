@@ -38,26 +38,11 @@ local function ToggleKDisplay()
     end
 end
 
--- 기본 경험치 바 숨기기
---MainMenuBarExpBar:Hide()
---MainMenuBarExpBar:UnregisterAllEvents()
-
-frame:RegisterEvent("MODIFIER_STATE_CHANGED")
-frame:RegisterEvent("PLAYER_LOGIN")
 frame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
 frame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
 
-local isAltPressed = false
-
 frame:SetScript("OnEvent", function(self, event, arg1, arg2)
-    if event == "MODIFIER_STATE_CHANGED" then
-        if arg1 == "LALT" or arg1 == "RALT" then
-            isAltPressed = (arg2 == 1)
-        end
-    elseif event == "PLAYER_LOGIN" then
-        -- 키 바인딩 설정
-        SetBindingClick("ALT-K", frame:GetName(), "LeftButton")
-    elseif event == "UNIT_SPELLCAST_CHANNEL_START" and arg1 == "player" then
+    if event == "UNIT_SPELLCAST_CHANNEL_START" and arg1 == "player" then
         isChanneling = true
         ShowK()
     elseif event == "UNIT_SPELLCAST_CHANNEL_STOP" and arg1 == "player" then
@@ -68,11 +53,14 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
     end
 end)
 
-frame:SetScript("OnKeyDown", function(self, key)
-    if isAltPressed and key == "K" then
-        ToggleKDisplay()
+local inputFrame = CreateFrame("Frame")
+inputFrame:RegisterEvent("PLAYER_LOGIN")
+inputFrame:SetScript("OnEvent", function()
+    local function OnMouseDown(self, button)
+        if button == "MiddleButton" then
+            ToggleKDisplay()
+        end
     end
-end)
 
-frame:EnableKeyboard(true)
-frame:SetPropagateKeyboardInput(true)
+    WorldFrame:HookScript("OnMouseDown", OnMouseDown)
+end)
