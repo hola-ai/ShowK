@@ -1,21 +1,56 @@
 local frame = CreateFrame("Frame", "ShowKFrame", UIParent)
-frame:SetSize(6, 6)  -- 표시할 영역의 크기 설정
-frame:SetPoint("CENTER", UIParent, "CENTER", -1403, -237)  -- 설정된 픽셀 위치에 배치
+frame:SetSize(6, 6)  -- 6x6 픽셀
+frame:SetPoint("CENTER", UIParent, "CENTER", -1414, -90)  -- 설정된 픽셀 위치에 배치
 
--- 배경 텍스처 추가 및 설정
-frame.bg = frame:CreateTexture(nil, "BACKGROUND")
-frame.bg:SetAllPoints(frame)
-frame.bg:SetColorTexture(1, 1, 1, 1)  -- 초기 상태는 불투명 (하얀색 배경)
+-- 2x2 픽셀 서브프레임 9개 생성 (3x3 배치, 합쳐서 6x6)
+-- 체커보드 패턴 (2x2 단위):
+--   검검 하하 검검
+--   검검 하하 검검
+--   하하 검검 하하
+--   하하 검검 하하
+--   검검 하하 검검
+--   검검 하하 검검
+local pixels = {}
+for row = 0, 2 do
+    for col = 0, 2 do
+        local px = CreateFrame("Frame", nil, frame)
+        px:SetSize(2, 2)
+        px:SetPoint("TOPLEFT", frame, "TOPLEFT", col * 2, -(row * 2))
+        px.tex = px:CreateTexture(nil, "BACKGROUND")
+        px.tex:SetAllPoints(px)
+        px.isBlack = ((row + col) % 2 == 0)
+        pixels[row * 3 + col + 1] = px
+    end
+end
 
-local isKShown = true
+local isKShown = false
 local isChanneling = false
 
+local function ShowCheckerboard()
+    for _, px in ipairs(pixels) do
+        if px.isBlack then
+            px.tex:SetColorTexture(0, 0, 0, 1)  -- 검정
+        else
+            px.tex:SetColorTexture(1, 1, 1, 1)  -- 하양
+        end
+    end
+end
+
+local function ShowTransparent()
+    for _, px in ipairs(pixels) do
+        px.tex:SetColorTexture(0, 0, 0, 0)  -- 투명
+    end
+end
+
+-- 초기 상태: 투명 (isKShown = false)
+ShowTransparent()
+
 local function ShowK()
-    frame.bg:SetColorTexture(1, 1, 1, 1)
+    ShowCheckerboard()
 end
 
 local function HideK()
-    frame.bg:SetColorTexture(1, 1, 1, 0)
+    ShowTransparent()
 end
 
 local function ToggleKDisplay()
