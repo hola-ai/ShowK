@@ -25,6 +25,7 @@ end
 
 local isKShown = false
 local isChanneling = false
+local isCasting = false
 
 local function ShowCheckerboard()
     for _, px in ipairs(pixels) do
@@ -53,31 +54,43 @@ local function HideK()
     ShowTransparent()
 end
 
-local function ToggleKDisplay()
-    if isKShown then
-        isKShown = false
-        if not isChanneling then
-            HideK()
-        end
-    else
-        isKShown = true
+local function UpdateDisplay()
+    if isKShown and not isCasting and not isChanneling then
         ShowK()
+    else
+        HideK()
     end
+end
+
+local function ToggleKDisplay()
+    isKShown = not isKShown
+    UpdateDisplay()
 end
 
 frame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
 frame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
+frame:RegisterEvent("UNIT_SPELLCAST_START")
+frame:RegisterEvent("UNIT_SPELLCAST_STOP")
+frame:RegisterEvent("UNIT_SPELLCAST_FAILED")
+frame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
 
-frame:SetScript("OnEvent", function(self, event, arg1, arg2)
-    if event == "UNIT_SPELLCAST_CHANNEL_START" and arg1 == "player" then
+frame:SetScript("OnEvent", function(self, event, arg1)
+    -- print("[ShowK] event=" .. event .. " arg1=" .. tostring(arg1))
+    if arg1 ~= "player" then return end
+
+    if event == "UNIT_SPELLCAST_CHANNEL_START" then
         isChanneling = true
-        ShowK()
-    elseif event == "UNIT_SPELLCAST_CHANNEL_STOP" and arg1 == "player" then
+    elseif event == "UNIT_SPELLCAST_CHANNEL_STOP" then
         isChanneling = false
-        if not isKShown then
-            HideK()
-        end
+    elseif event == "UNIT_SPELLCAST_START" then
+        isCasting = true
+    elseif event == "UNIT_SPELLCAST_STOP"
+        or event == "UNIT_SPELLCAST_FAILED"
+        or event == "UNIT_SPELLCAST_INTERRUPTED" then
+        isCasting = false
     end
+
+    UpdateDisplay()
 end)
 
 local inputFrame = CreateFrame("Frame")
@@ -91,3 +104,4 @@ inputFrame:SetScript("OnEvent", function()
 
     WorldFrame:HookScript("OnMouseDown", OnMouseDown)
 end)
+
